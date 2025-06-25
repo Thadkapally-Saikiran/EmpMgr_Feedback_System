@@ -1,0 +1,56 @@
+<!-- register.html -->
+<!DOCTYPE html>  
+<html>  
+<head>  
+  <title>Register</title>  
+  <!-- Link to custom CSS for consistent styling -->  
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">  
+</head>  
+{% with messages = get_flashed_messages(with_categories=true) %}  
+  {% if messages %}  
+    {% for category, msg in messages %}  
+      <!-- Display each flash message with Bootstrap-style alert classes -->  
+      <div class="alert alert-{{ category }}">  
+          {{ msg }}  
+          <!-- Button to close the alert by hiding its container -->  
+          <button class="close-btn" onclick="this.parentElement.style.display='none'">&times;</button>  
+      </div>  
+    {% endfor %}  
+  {% endif %}  
+{% endwith %}  
+<body>  
+  <h2>Register</h2>  
+  <!-- Registration form submits via POST to same endpoint -->  
+  <form method="POST">  
+    <label>Full Name:</label><br>  
+    <input type="text" name="name" required><br><br>  
+
+    <label>Email:</label><br>  
+    <input type="email" name="email" required><br><br>  
+
+    <label>Password:</label><br>  
+    <input type="password" name="password" required><br><br>  
+
+    <label>Role:</label><br>  
+    <!-- Dropdown to select user role for RBAC -->  
+    <select name="role" required>  
+      <option value="manager">Manager</option>  
+      <option value="employee">Employee</option>  
+    </select><br><br>  
+
+    <!-- Optional manager assignment during signup -->  
+    <label>Reports To (Manager):</label><br>  
+    <select name="manager_id">  
+      <option value="">— Select Manager —</option>  
+      {% for mgr in managers %}  
+        <!-- Populate managers list from context tuple (id, name) -->  
+        <option value="{{ mgr[0] }}">{{ mgr[1] }}</option>  
+      {% endfor %}  
+    </select>  
+    <br><br>  
+
+    <button type="submit">Register</button>  
+  </form>  
+  <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>  
+</body>  
+</html>  

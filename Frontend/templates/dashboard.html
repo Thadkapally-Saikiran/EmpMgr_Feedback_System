@@ -1,0 +1,202 @@
+<!-- dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <!-- Shared stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='manager.css') }}">
+</head>
+<body>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, msg in messages %}
+        <div class="alert alert-{{ category }} mt-3">
+          {{ msg }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+  <!-- Header -->
+  <header class="header">
+    <h1>DPDZero Feedback Management System</h1>
+    <div>
+      <span>Welcome, {{ session['name'] }} ({{ session['role']|capitalize }})</span>
+      <a class="btn-logout" href="{{ url_for('logout') }}">Logout</a>
+    </div>
+  </header>
+
+  <!-- Main Layout: Sidebar + Content -->
+  <div class="layout">
+    <!-- Sidebar for navigation -->
+    <nav class="sidebar">
+      <a href="{{ url_for('dashboard') }}" class="nav-item active">Dashboard</a>
+      {% if session['role']=='manager' %}
+        <a href="{{ url_for('submit_feedback') }}" class="nav-item">Submit Feedback</a>
+      {% else %}
+        <a href="{{ url_for('view_feedback') }}" class="nav-item">My Feedback</a>
+      {% endif %}
+    </nav>
+
+    <!-- Content Area -->
+    <main class="content">
+      {% if session['role']=='manager' %}
+        <!-- MANAGER DASHBOARD -->
+        <section class="card-container">
+          <!-- Summary Cards -->
+          <div class="card">
+            <h3>Total Employees</h3>
+            <p>{{ employees|length }}</p>
+          </div>
+          <div class="card">
+            <h3>Total Feedbacks</h3>
+            <p>{{ total_feedbacks }}</p>
+          </div>
+          <div class="card">
+            <h3>Positive</h3>
+            <p>{{ positive_count }}</p>
+          </div>
+          <div class="card">
+            <h3>Neutral</h3>
+            <p>{{ neutral_count }}</p>
+          </div>
+          <div class="card">
+            <h3>Negative</h3>
+            <p>{{ negative_count }}</p>
+          </div>
+        </section>
+
+        <!-- Team List with Quick Actions -->
+        <section>
+          <h2>Your Team</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th><th># Feedback</th><th>Last Feedback</th><th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for emp in employees %}
+                <tr>
+                  <td>{{ emp.name }}</td>
+                  <td>{{ emp.feedback_count }}</td>
+                  <td>{{ emp.last_feedback_date or '—' }}</td>
+                  <td>
+                    <button onclick="location.href='{{ url_for('submit_feedback') }}';">
+                      Give Feedback
+                    </button>
+                    <button class="btn-view-feedback" onclick="location.href='{{ url_for('manager_view_feedback', emp_id=emp.id) }}';">
+                      View Feedback
+                    </button>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      {% else %}
+        <!-- EMPLOYEE DASHBOARD -->
+        <section>
+          <h2>Your Feedback Timeline</h2>
+          <!-- Tag filter -->
+          <div class="filter">
+            <label for="tagFilter">Filter by Tag:</label>
+            <input id="tagFilter" type="text" placeholder="Type a tag...">
+          </div>
+          <!-- Feedback List -->
+          <div id="feedback-list">
+            {% for fb in feedbacks %}
+            <div class="feedback-box" data-tags="{{ fb.tags }}">
+              <div class="fb-header">
+                <span class="sentiment {{ fb.sentiment }}">{{ fb.sentiment|capitalize }}</span>
+                <small>
+                  {% if fb.updated_at and fb.updated_at != fb.created_at %}
+                    {{ fb.updated_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                  {% else %}
+                    {{ fb.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                  {% endif %}
+                </small>
+              </div>
+              <p><strong>Strengths:</strong> {{ fb.strengths }}</p>
+              <p><strong>Improvements:</strong> {{ fb.improvements }}</p>
+              <p><strong>Tags:</strong> {{ fb.tags }}</p>
+              <div class="fb-actions">
+                {# If this feedback has already been ack'd, show a disabled ✓ button #}
+                {% if ack_map.get(fb.id) %}
+                  <button class="btn btn-success" disabled>✅ Acknowledged</button>
+                {% else %}
+                  <form method="POST"
+                        action="{{ url_for('acknowledge_feedback', fid=fb.id) }}"
+                        style="display:inline;">
+                    <button type="submit" class="btn btn-primary">
+                      Acknowledge
+                    </button>
+                  </form>
+                {% endif %}
+
+                {# Export PDF remains unchanged #}
+                <button onclick="exportPDF({{ fb.id }})"
+                        class="btn btn-info">
+                  Export PDF
+                </button>
+              </div>
+
+              <!-- ===== UPDATED COMMENTS BLOCK ===== -->
+              <div class="comments">
+                <h4>Comments</h4>
+                <form method="POST" action="{{ url_for('add_comment', fid=fb.id) }}">
+                  <input type="hidden" name="next" value="{{ request.path }}">
+                  <textarea name="comment" required placeholder="Add comment (Markdown)"></textarea>
+                  <button type="submit">Post</button>
+                </form>
+                <ul id="comments-{{ fb.id }}">
+                  {% for comm in comments_map.get(fb.id, []) %}
+                    <li>
+                      <strong>{{ comm.user_name }}</strong>
+                      <small>{{ comm.created_at }}</small><br>
+                      <span class="comment-body">{{ comm.comment_text }}</span>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+              <!-- ===== end comments ===== -->
+
+            </div>
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
+    </main>
+  </div>
+
+  <!-- JS for tag filtering, markdown parsing & PDF export -->
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+  <!-- ===== TAG FILTER HOOK ===== -->
+  <script>
+    document
+      .getElementById('tagFilter')
+      .addEventListener('input', function(e) {
+        const tag = e.target.value.trim().toLowerCase();
+        if (!tag) {
+          // show all if filter box is empty
+          document.querySelectorAll('.feedback-box')
+                  .forEach(div => div.style.display = 'block');
+        } else {
+          filterByTag(tag);
+        }
+      });
+  </script>
+
+  <script>
+    // Trigger PDF export by navigating to the export route
+    function exportPDF(fid) {
+      window.open(`{{ url_for('export_feedback', fid=0) }}`.replace('/0', '/' + fid), '_blank');
+    }
+  </script>
+</body>
+</html>

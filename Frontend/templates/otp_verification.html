@@ -1,0 +1,115 @@
+<!--otp_verification-->
+<!DOCTYPE html>  <!-- HTML5 document declaration -->
+<html lang="en">  <!-- Root element with language attribute -->
+<head>  <!-- Metadata and resource links -->
+  <meta charset="UTF-8">  <!-- Character encoding for proper text rendering -->
+  <title>OTP Verification</title>  <!-- Title shown in browser tab -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">  <!-- Link to external CSS via Flask’s url_for helper -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #ADD8E6; /* light blue */
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      font-family: Arial, sans-serif;
+    }
+    /* dark yellow semi-transparent overlay */
+    body::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(204, 153, 0, 0.5);
+      z-index: 1;
+    }
+    /* floating card */
+    .otp-card {
+      position: relative;
+      z-index: 2;
+      background: white;
+      width: 320px;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+    h2 {
+      margin-top: 4rem;
+      font-size: 1.5rem;
+      background: linear-gradient(90deg, #FF416C, #1E90FF);
+    /*is the standard CSS property now supported in Firefox, Edge, and Chrome.*/
+      background-clip: text;           /* standard property */
+      -webkit-background-clip: text;   /* WebKit prefix for Safari/older browsers */
+      -webkit-text-fill-color: transparent;
+      animation: shine 4s linear infinite;
+    }
+    @keyframes shine {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .otp-input {
+      font-size: 1.2rem;
+      letter-spacing: 8px;
+      padding: 0.5rem;
+      width: 100%;
+      text-align: center;
+      margin: 1rem 0;
+      border: 2px solid #333;
+      border-radius: 6px;
+    }
+    button {
+      background: #28A745;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+    button:hover {
+      background: #218838;
+      transform: translateY(-2px);
+    }
+    .flash {
+      margin-bottom: 1rem;
+      color: #721c24;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>  <!-- Main page content container -->
+
+  <div class="otp-card">  <!-- Floating card container styled in CSS -->
+    {% with messages = get_flashed_messages() %}  <!-- Jinja block to retrieve flash messages -->
+      {% if messages %}  <!-- Check if any flash messages exist -->
+        <div class="flash">{{ messages[0] }}</div>  <!-- Display first flash message -->
+      {% endif %}
+    {% endwith %}
+
+    <h2>Verify It's Really You</h2>  <!-- Heading prompting user action -->
+    <p>Please enter the 6-digit OTP we just emailed you.</p>  <!-- Instructional text -->
+
+
+
+    <!-- <input type="text" => OTP input field -->
+    <!-- name="otp" => Form field name for server-side retrieval -->
+    <!-- class="otp-input" => CSS class for styling the input -->
+    <!-- maxlength="6"  => Limit input to 6 characters -->
+    <!-- placeholder="——  ——  ——"  => Visual placeholder for OTP digits -->
+    <form method="POST">  <!-- Form posts back to this same route -->
+      <input type="text"  
+             name="otp"  
+             class="otp-input"  
+             maxlength="6"  
+             placeholder="——  ——  ——"  
+             required>  <!-- HTML5 validation: field must not be empty -->
+      <button type="submit">Verify OTP</button>  <!-- Submit button to send OTP -->
+    </form>
+  </div>
+</body>
+</html>

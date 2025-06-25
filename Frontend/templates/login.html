@@ -1,0 +1,222 @@
+<!-- login.html -->
+<!DOCTYPE html>  <!-- Declare HTML5 document type -->
+<html>  <!-- Root HTML element -->
+<head>  <!-- Metadata and resource links -->
+  <title>Login</title>  <!-- Page title shown in browser tab -->
+
+  <!-- Bootstrap CSS (added) -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />  <!-- Load Bootstrap from CDN for responsive styling -->
+
+  <!-- Your existing styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">  <!-- Link to custom CSS file -->
+  <style>
+    /* Logo styling (per your HTML&CSS PDF guidelines) */
+    .navbar-brand {
+    font-family: 'Segoe UI', sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: 0.05em;
+    }
+    .dpd-logo .brand-primary { color: #1D4ED8; }
+    .dpd-logo .brand-highlight { color: #EF4444; }
+    /* Shiny gradient text per your HTML&CSS PDF guidelines */
+    .welcome-text {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 3rem;
+    font-weight: 700;
+    background: linear-gradient(90deg,
+    #FF416C,
+    #FF4B2B,
+    #FF7F50,
+    #FFD700,
+    #7FFF00,
+    #00CED1,
+    #1E90FF,
+    #9400D3);
+    background-size: 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 5s linear infinite;
+    }
+    @keyframes shine {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+    }
+    /* == NEW: Hero + Floating Card == */
+    .login-page {
+    position: relative;
+    min-height: 100vh;
+    background: url('/static/images/EmpMGR_Feedback_System.jpg') no-repeat 
+    center/cover;
+    display: flex;
+    flex-direction: column;
+    }
+    .login-page::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    }
+    .login-container {
+    position: relative; /* lift content above the overlay */
+    z-index: 1;
+    flex: 1; /* fill rest of viewport under nav */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    }
+    .login-card {
+    background: #ffffff;
+    padding: 2rem;
+    max-width: 360px;
+    width: 100%;
+    border-radius: 0.75rem;
+    box-shadow: 0 16px 32px rgba(0,0,0,0.2);
+    text-align: center;
+    }
+    .login-card h2 {
+    margin-bottom: 1.5rem;
+    font-size: 1.75rem;
+    color: #333;
+    }
+    .login-card .form-control {
+    margin-bottom: 1rem;
+    border-radius: 0.5rem;
+    }
+    .login-card .btn-primary {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1.125rem;
+    border-radius: 0.5rem;
+    }
+    .login-card p {
+    margin-top: 1rem;
+    }
+ </style>
+
+</head>
+
+<body class="login-page">  <!-- Apply 'login-page' class for page-specific styles -->
+
+  <!-- DPDZero Navbar (background & shadow removed) -->
+  <nav class="navbar navbar-light py-3 mb-0">  <!-- Light Bootstrap navbar with vertical padding and no bottom margin -->
+    <div class="container-fluid">  <!-- Full-width Bootstrap container -->
+      <a
+        class="navbar-brand d-flex align-items-center dpd-logo"
+        href="{{ url_for('login') }}"
+        style="font-size: 2.5rem;">  <!-- Brand link with flex alignment and large font -->
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="48" height="48"
+          fill="#1D4ED8"
+          class="me-3"
+          viewBox="0 0 16 16">  <!-- Inline SVG logo with blue fill and right margin -->
+          <circle cx="8" cy="8" r="8" />  <!-- Draw circular background -->
+          <text
+            x="8"
+            y="11"
+            text-anchor="middle"
+            font-size="10"
+            fill="#fff"
+            font-family="Arial, sans-serif"
+            font-weight="700">  <!-- Centered white 'D' text -->
+            D
+          </text>
+        </svg>
+        <span class="brand-primary" style="letter-spacing:0.1em;">DPD</span>  <!-- Primary brand text with letter spacing -->
+        <span class="brand-highlight">Zero</span>  <!-- Highlighted brand subtext -->
+      </a>
+    </div>
+  </nav>
+
+  <!-- Hero + Card wrapper -->
+  <div class="login-container">  <!-- Wrapper for the hero banner and login card -->
+
+    <!-- Optional: keep your welcome banner -->
+    <div class="text-center mb-4">  <!-- Centered text with bottom margin -->
+      <h1 class="welcome-text">
+<pre>
+Welcome to DPDzero Employee-Manager
+Feedback Management System
+</pre>  <!-- Preformatted welcome text for line breaks -->
+      </h1>
+    </div>
+
+    <!-- FLOATING CARD -->
+    <div class="login-card">  <!-- Card container for login form -->
+      <h2>Login</h2>  <!-- Section header -->
+
+      <!-- Retrieve flash messages with categories -->
+      {% with messages = get_flashed_messages(with_categories=true) %}  
+        {% if messages %}  <!-- If there are any flash messages -->
+          {% for category, msg in messages %}  <!-- Loop through each message -->
+            <!-- Bootstrap alert with dynamic type and flex layout -->
+            <div class="alert alert-{{ category }} d-flex justify-content-between align-items-center">  
+              {{ msg }}  <!-- Display the flash message content -->
+              <button class="btn-close" onclick="this.parentElement.style.display='none'"></button>  <!-- Close button hides alert -->
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST">  <!-- Login form posts to same endpoint -->
+        <input
+          type="email" 
+          name="email"
+          required
+          class="form-control"
+          placeholder="Enter your email"
+        />  <!-- Email input with Bootstrap styling and placeholder -->
+
+        <!-- Wrapper for password field with relative positioning -->
+        <div class="password-wrapper position-relative mb-3">  
+          <input
+            type="password"
+            name="password"
+            id="password"
+            required
+            class="form-control pe-5"
+            placeholder="Enter your password"
+          />  <!-- Password input with extra right padding for toggle button -->
+          <button
+            type="button"
+            class="toggle-visibility btn btn-sm position-absolute top-50 end-0 translate-middle-y me-2"
+            style="background: none; border: none;"
+          >  <!-- Eye icon button to toggle password visibility -->
+            👁️
+          </button>
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>  <!-- Primary submit button -->
+      </form>
+
+      <p>Don’t have an account?
+        <a href="{{ url_for('register') }}">Register here</a>  <!-- Link to registration page -->
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // Add click listener to the toggle button after the DOM loads
+    document.querySelector('.toggle-visibility').addEventListener('click', function() {
+        // Reference the password input field by its ID
+        const pw = document.getElementById('password');
+        // Check if the password is currently hidden
+        if (pw.type === 'password') {
+          pw.type = 'text';          // Show the password text
+          this.textContent = '🙈';   // Update the button icon to "hide" emoji
+        } else {
+          pw.type = 'password';      // Hide the password text
+          this.textContent = '👁️';   // Reset the button icon to "show" emoji
+      }
+    });
+
+  </script>
+
+</body>
+</html>

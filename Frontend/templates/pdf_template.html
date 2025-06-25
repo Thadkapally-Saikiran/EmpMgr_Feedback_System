@@ -1,0 +1,27 @@
+<!-- pdf_template.html -->
+<!DOCTYPE html>  <!-- Use HTML5 standard document type -->
+<html>  <!-- Root element of the PDF HTML -->
+<head>  <!-- Metadata and styles for PDF rendering -->
+
+
+
+  <!-- Inline CSS for basic PDF layout -->
+  <!-- Set default font to Arial for readability -->
+  <!-- Add space between report sections -->
+  <style>  
+    body { font-family: Arial; }  
+    .section { margin-bottom: 15px; }  
+  </style>
+  
+  <!-- Include external CSS via Flask helper -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">  
+</head>
+<body>  <!-- Page body containing report content -->
+  <h2>Feedback Report</h2>  <!-- Title of the generated PDF report -->
+  <div class="section"><strong>Sentiment:</strong> {{ fb.sentiment }}</div>  <!-- Display sentiment label and value -->
+  <div class="section"><strong>Strengths:</strong><br>{{ fb.strengths }}</div>  <!-- Section for strengths with line break -->
+  <div class="section"><strong>Improvements:</strong><br>{{ fb.improvements }}</div>  <!-- Section for areas to improve -->
+  <div class="section"><strong>Tags:</strong> {{ fb.tags }}</div>  <!-- Show comma-separated tags -->
+  <div class="section"><small>Created: {{ fb.created_at }}</small></div>  <!-- Timestamp for when feedback was created -->
+</body>
+</html>

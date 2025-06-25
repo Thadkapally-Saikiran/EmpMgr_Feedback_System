@@ -1,0 +1,58 @@
+<!--manager_view_feedback.html-->
+<!DOCTYPE html>  <!-- HTML5 doctype for modern browser compatibility -->
+<html><head>  <!-- Begin document head where resources are declared -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">  <!-- Load global CSS via Flask helper -->
+  <script src="{{ url_for('static', filename='script.js') }}"></script>  <!-- Include external JS for interactivity -->
+  <title>Feedback for {{ emp.name }}</title>  <!-- Dynamic page title showing employee’s name -->
+</head><body>  <!-- Main content begins -->
+  <a href="{{ url_for('dashboard') }}">← Back to Dashboard</a>  <!-- Navigation link back to manager dashboard -->
+  {% with messages = get_flashed_messages(with_categories=true) %}  <!-- Retrieve flash messages with their categories -->
+    {% if messages %}  <!-- Only render if there are any flashed messages -->
+      {% for category, msg in messages %}  <!-- Loop through each flash tuple -->
+        <div class="alert alert-{{ category }} mt-3">  <!-- Show alert box with category-based styling -->
+          {{ msg }}  <!-- Display the message text -->
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+  <h2>Feedback History: {{ emp.name }}</h2>  <!-- Header indicating whose feedback is being viewed -->
+  {% for fb in feedbacks %}  <!-- Iterate over each feedback record -->
+  <div class="feedback-box" data-tags="{{ fb.tags }}">  <!-- Container with data attribute for client-side tag filtering -->
+    <div class="fb-header">  <!-- Header section for sentiment badge and timestamp -->
+      <span class="sentiment {{ fb.sentiment }}">{{ fb.sentiment|capitalize }}</span>  <!-- Condition-based CSS class and capitalized sentiment -->
+      <small>  <!-- Smaller font for time display -->
+        {% if fb.updated_at and fb.updated_at != fb.created_at %}  <!-- Check if feedback was edited -->
+          {{ fb.updated_at.strftime('%Y-%m-%d %H:%M:%S') }}  <!-- Show formatted updated timestamp -->
+        {% else %}  <!-- Otherwise use original creation time -->
+          {{ fb.created_at.strftime('%Y-%m-%d %H:%M:%S') }}  <!-- Formatted creation timestamp -->
+        {% endif %}
+      </small>
+    </div>
+    <p><strong>Strengths:</strong> {{ fb.strengths }}</p>  <!-- Paragraph showing strengths content -->
+    <p><strong>Improvements:</strong> {{ fb.improvements }}</p>  <!-- Paragraph showing improvement points -->
+    <p><strong>Tags:</strong> {{ fb.tags }}</p>  <!-- Paragraph listing comma-separated tags -->
+    <div class="fb-actions">  <!-- Action buttons container -->
+      <button onclick="location.href='{{ url_for('update_feedback', fid=fb.id) }}';">Update Feedback</button>  <!-- Button linking to feedback update page -->
+    </div>
+
+
+    <!-- Comment Form -->
+    <div class="fb-comment-form">  <!-- Wrapper for new comment input -->
+      <form action="{{ url_for('add_comment', fid=fb.id) }}" method="post">  <!-- POST form to add a comment -->
+        <textarea name="comment" placeholder="Leave a Comment (Markdown supported)"></textarea>  <!-- Textarea with placeholder -->
+        <button class="btn">Add Comment</button>  <!-- Submit button styled as btn -->
+      </form>
+    </div>
+
+    <!-- Comment Thread -->
+    <div class="comments-section">  <!-- Container for existing comments -->
+      {% for c in comments_map.get(fb.id, []) %}  <!-- Loop through comments for this feedback -->
+        <div class="comment">  <!-- Individual comment block -->
+          <strong>{{ c.user }}</strong><br/>  <!-- Show commenter’s name in bold -->
+          {{ c.text }}  <!-- Display comment text, may include markdown-rendered HTML -->
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</body></html>

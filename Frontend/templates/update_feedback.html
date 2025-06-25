@@ -1,0 +1,27 @@
+<!--update_feedback.html-->
+<!DOCTYPE html>  <!-- Declare HTML5 document type -->
+<html>  <!-- Root element of the HTML page -->
+<head>  <!-- Metadata and resource links go here -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">  <!-- Include external CSS using Flask helper -->
+  <title>Update Feedback</title>  <!-- Title shown in browser tab -->
+</head>
+<body>  <!-- Main content container -->
+  <a href="{{ url_for('manager_view_feedback', emp_id=fb.employee_id) }}">← Back</a>  <!-- Navigation link back to manager’s feedback list -->
+  <h2>Update Feedback (ID: {{ fb.id }})</h2>  <!-- Heading showing the feedback ID -->
+  <form method="POST">  <!-- Form to submit updated feedback via POST -->
+    <label>Strengths:</label><br>  <!-- Label for strengths textarea -->
+    <textarea name="strengths" required>{{ fb.strengths }}</textarea><br><br>  <!-- Prefilled strengths input, required field -->
+    <label>Improvements:</label><br>  <!-- Label for improvements textarea -->
+    <textarea name="improvements" required>{{ fb.improvements }}</textarea><br><br>  <!-- Prefilled improvements input, required field -->
+    <label>Sentiment:</label><br>  <!-- Label for sentiment dropdown -->
+    <select name="sentiment">  <!-- Dropdown to select overall sentiment -->
+      <option value="positive" {% if fb.sentiment=='positive' %}selected{% endif %}>Positive</option>  <!-- Positive option, selected if current sentiment -->
+      <option value="neutral"  {% if fb.sentiment=='neutral'  %}selected{% endif %}>Neutral</option>  <!-- Neutral option, selected if current sentiment -->
+      <option value="negative" {% if fb.sentiment=='negative' %}selected{% endif %}>Negative</option>  <!-- Negative option, selected if current sentiment -->
+    </select><br><br>  <!-- End of dropdown and vertical spacing -->
+    <label>Tags:</label><br>  <!-- Label for tags input -->
+    <input type="text" name="tags" value="{{ fb.tags }}"><br><br>  <!-- Text input prefilled with existing tags -->
+    <button type="submit">Save Changes</button>  <!-- Submit button to save updates -->
+  </form>
+</body>
+</html>  <!-- End of HTML document -->

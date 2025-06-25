@@ -1,0 +1,51 @@
+<!-- submit_feedback.html -->
+<!DOCTYPE html>  <!-- HTML5 document type for modern browser rendering -->
+<html>  <!-- Root element enclosing the entire page -->
+<head>  <!-- Metadata and resource links section -->
+  <title>Submit Feedback</title>  <!-- Browser tab title indicating page purpose -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">  <!-- Link to CSS via Flask helper for consistent styling -->
+</head>
+<body>  <!-- Main visible content container -->
+  <a href="{{ url_for('dashboard') }}">←  Back to Dashboard</a>  <!-- Navigation link back to the dashboard page -->
+  <!-- Flash messages go here -->
+  {% with messages = get_flashed_messages(with_categories=true) %}  <!-- Capture flashed messages with their categories -->
+    {% if messages %}  <!-- Check if any flash messages exist -->
+      {% for category, msg in messages %}  <!-- Loop over each flash message tuple -->
+        <div class="alert alert-{{ category }} mt-3">  <!-- Alert box styled by category (e.g., success, warning) -->
+          {{ msg }}  <!-- Display the actual flash message text -->
+        </div>
+      {% endfor %}  <!-- End of flash message loop -->
+    {% endif %}  <!-- End of check for messages -->
+  {% endwith %}  <!-- End of context block for flash messages -->
+
+  <h2>Submit Feedback</h2>  <!-- Heading for the feedback submission section -->
+
+  <form method="POST">  <!-- Form to send new feedback via POST request -->
+    <label>Select Employee:</label><br>  <!-- Label for employee dropdown -->
+    <select name="employee_id">  <!-- Dropdown to choose which employee to review -->
+      {% for emp in employees %}  <!-- Loop through manager’s team members -->
+      <option value="{{ emp.id }}">{{ emp.name }}</option>  <!-- Option tag with employee ID and name -->
+      {% endfor %}  <!-- End of employee options loop -->
+    </select><br><br>  <!-- Close dropdown and add spacing -->
+
+    <label>Strengths:</label><br>  <!-- Label for strengths textarea -->
+    <textarea name="strengths" required></textarea><br><br>  <!-- Text area for listing strengths, required field -->
+
+    <label>Areas for Improvement:</label><br>  <!-- Label for improvements textarea -->
+    <textarea name="improvements" required></textarea><br><br>  <!-- Text area for listing improvements, required field -->
+
+    <label>Sentiment:</label><br>  <!-- Label for sentiment selection -->
+    <select name="sentiment">  <!-- Dropdown for overall sentiment -->
+      <option value="positive">Positive</option>  <!-- Positive sentiment option -->
+      <option value="neutral">Neutral</option>  <!-- Neutral sentiment option -->
+      <option value="negative">Negative</option>  <!-- Negative sentiment option -->
+    </select><br><br>  <!-- Close sentiment dropdown and add spacing -->
+
+    <label>Tags (comma separated):</label><br>  <!-- Label for optional tagging -->
+    <input type="text" name="tags" placeholder="e.g. communication, leadership"><br><br>  <!-- Input for tags, with placeholder for guidance -->
+
+    <button type="submit">Submit Feedback</button>  <!-- Button to submit the form -->
+  </form>  <!-- End of feedback submission form -->
+  
+</body>  <!-- End of main content container -->
+</html>  <!-- End of HTML document -->

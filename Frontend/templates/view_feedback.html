@@ -1,0 +1,68 @@
+<!-- view_feedback.html -->
+<!DOCTYPE html>  <!-- Use HTML5 document type declaration -->
+<html>  <!-- Root element of the page -->
+<head>  <!-- Metadata and resource links -->
+  <title>Your Feedback</title>  <!-- Page title shown in browser tab -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">  <!-- Link to external CSS via Flask helper -->
+</head>
+<body>  <!-- Main content area -->
+  <a href="{{ url_for('dashboard') }}">← Back to Dashboard</a>  <!-- Navigation link back to user dashboard -->
+  <h2>Your Feedback Timeline</h2>  <!-- Heading for feedback list -->
+
+  {% for fb in feedbacks %}  <!-- Loop through each feedback entry in Jinja context -->
+    <div class="feedback-box {% if fb.id in ack_map %}read{% endif %}" style="margin-bottom:15px;">  <!-- Container with conditional 'read' class and bottom margin -->
+      <div class="fb-header">  <!-- Header section for sentiment and timestamp -->
+        <span class="sentiment {{ fb.sentiment }}">{{ fb.sentiment|capitalize }}</span>  <!-- Display sentiment with CSS class and capitalized text -->
+        <small>  <!-- Smaller text for date/time -->
+          {% if fb.updated_at and fb.updated_at != fb.created_at %}  <!-- Use updated timestamp if feedback was edited -->
+            {{ fb.updated_at.strftime('%Y-%m-%d %H:%M:%S') }}  <!-- Formatted updated timestamp -->
+          {% else %}  <!-- Otherwise, show creation timestamp -->
+            {{ fb.created_at.strftime('%Y-%m-%d %H:%M:%S') }}  <!-- Formatted creation timestamp -->
+          {% endif %}
+        </small>
+      </div>
+      <p><strong>Strengths:</strong> {{ fb.strengths }}</p>  <!-- Paragraph displaying strengths text -->
+      <p><strong>Improvements:</strong> {{ fb.improvements }}</p>  <!-- Paragraph displaying improvements text -->
+      <p><strong>Tags:</strong> {{ fb.tags }}</p>  <!-- Paragraph showing comma-separated tags -->
+
+      <div class="fb-actions">  <!-- Action buttons container -->
+        {% if fb.id not in ack_map %}  <!-- Show acknowledge button only if not already acknowledged -->
+          <form method="POST" action="{{ url_for('acknowledge_feedback', fid=fb.id) }}">  <!-- Form to submit acknowledgment -->
+            <button type="submit" class="btn">Acknowledge</button>  <!-- Acknowledge button -->
+          </form>
+        {% else %}  <!-- If already acknowledged, show timestamp badge -->
+          <span class="badge badge-success">
+            Acknowledged {{ ack_map[fb.id] }}  <!-- Display time of acknowledgment -->
+          </span>
+        {% endif %}
+        <button class="btn" onclick="exportPDF({{ fb.id }})">  <!-- Button triggers JavaScript PDF export -->
+          Export PDF
+        </button>
+      </div>
+
+      <!-- ========= COMMENT FORM & LIST ========= -->
+      <h4>Leave a Comment (Markdown supported)</h4>  <!-- Subheading for comment section -->
+      <form method="POST" action="{{ url_for('add_comment', fid=fb.id) }}">  <!-- Form to post a new comment -->
+        <textarea name="comment" placeholder="Type your comment here..." required></textarea><br>  <!-- Textarea with placeholder and required attribute -->
+        <button type="submit">Add Comment</button>  <!-- Submit button for comment -->
+      </form>
+
+      <!-- Comments section -->
+      <div>  <!-- Wrapper for comments list -->
+        <h5>Comments:</h5>  <!-- Heading for list of existing comments -->
+        <ul id="comments-{{ fb.id }}">  <!-- Unordered list with unique ID for JS targeting -->
+          {% for comm in comments_map.get(fb.id, []) %}  <!-- Loop through comments for this feedback -->
+            <li>  <!-- Single comment item -->
+              <strong>{{ comm.user_name }}</strong><br>  <!-- Display commenter’s name in bold -->
+              <span class="comment-body">{{ comm.comment_text }}</span>  <!-- Show comment text -->
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  {% endfor %}
+
+  <!-- Include your script.js for markdown parsing & tag filtering -->
+  <script src="{{ url_for('static', filename='script.js') }}"></script>  <!-- Link to external JS via Flask helper -->
+</body>
+</html>
