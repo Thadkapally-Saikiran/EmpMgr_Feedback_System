@@ -155,46 +155,8 @@ The core tables are:
 | comment\_text | TEXT      | Markdown-supported comment    |
 | created\_at   | TIMESTAMP | Timestamp of comment creation |
 
-\-------------- | ----------- | ------------------------------------ |
-\| id             | INT PK AI   | Unique user identifier               |
-\| name           | VARCHAR     | Full name                            |
-\| email          | VARCHAR\_UQ  | Login email (Gmail only)             |
-\| password       | VARCHAR     | Bcrypt-hashed password               |
-\| role           | ENUM        | `manager` or `employee`              |
-\| manager\_id     | INT FK      | References `users(id)` for employees |
-\| created\_at     | TIMESTAMP   | Record creation time                 |
 
-### `feedback`
 
-| Column       | Type      | Description                     |
-| ------------ | --------- | ------------------------------- |
-| id           | INT PK AI | Unique feedback ID              |
-| manager\_id  | INT FK    | Manager who created feedback    |
-| employee\_id | INT FK    | Employee receiving feedback     |
-| strengths    | TEXT      | Positive comments               |
-| improvements | TEXT      | Areas to improve                |
-| sentiment    | ENUM      | `positive`,`neutral`,`negative` |
-| tags         | VARCHAR   | Comma-separated tags            |
-| created\_at  | TIMESTAMP | Timestamp of creation           |
-| updated\_at  | TIMESTAMP | Timestamp of last update        |
-
-### `acknowledgements`
-
-| Column           | Type      | Description                    |
-| ---------------- | --------- | ------------------------------ |
-| feedback\_id     | INT FK    | References `feedback(id)`      |
-| employee\_id     | INT FK    | References `users(id)`         |
-| acknowledged\_at | TIMESTAMP | When the employee acknowledged |
-
-### `comments`
-
-| Column        | Type      | Description                   |
-| ------------- | --------- | ----------------------------- |
-| id            | INT PK AI | Unique comment ID             |
-| feedback\_id  | INT FK    | References `feedback(id)`     |
-| user\_id      | INT FK    | Author (manager or employee)  |
-| comment\_text | TEXT      | Markdown-supported comment    |
-| created\_at   | TIMESTAMP | Timestamp of comment creation |
 
 ### ER Diagram
 
@@ -211,46 +173,6 @@ The core tables are:
                        +-----+              +----------------+
 ```
 
-\-------------- | ----------- | ------------------------------------ |
-\| id             | INT PK AI   | Unique user identifier               |
-\| name           | VARCHAR     | Full name                            |
-\| email          | VARCHAR\_UQ  | Login email (Gmail only)             |
-\| password       | VARCHAR     | Bcrypt-hashed password               |
-\| role           | ENUM        | `manager` or `employee`              |
-\| manager\_id     | INT FK      | References `users(id)` for employees |
-\| created\_at     | TIMESTAMP   | Record creation time                 |
-
-### `feedback`
-
-| Column       | Type      | Description                     |
-| ------------ | --------- | ------------------------------- |
-| id           | INT PK AI | Unique feedback ID              |
-| manager\_id  | INT FK    | Manager who created feedback    |
-| employee\_id | INT FK    | Employee receiving feedback     |
-| strengths    | TEXT      | Positive comments               |
-| improvements | TEXT      | Areas to improve                |
-| sentiment    | ENUM      | `positive`,`neutral`,`negative` |
-| tags         | VARCHAR   | Comma-separated tags            |
-| created\_at  | TIMESTAMP | Timestamp of creation           |
-| updated\_at  | TIMESTAMP | Timestamp of last update        |
-
-### `acknowledgements`
-
-| Column           | Type      | Description                    |
-| ---------------- | --------- | ------------------------------ |
-| feedback\_id     | INT FK    | References `feedback(id)`      |
-| employee\_id     | INT FK    | References `users(id)`         |
-| acknowledged\_at | TIMESTAMP | When the employee acknowledged |
-
-### `comments`
-
-| Column        | Type      | Description                   |
-| ------------- | --------- | ----------------------------- |
-| id            | INT PK AI | Unique comment ID             |
-| feedback\_id  | INT FK    | References `feedback(id)`     |
-| user\_id      | INT FK    | Author (manager or employee)  |
-| comment\_text | TEXT      | Markdown-supported comment    |
-| created\_at   | TIMESTAMP | Timestamp of comment creation |
 
 ---
 
