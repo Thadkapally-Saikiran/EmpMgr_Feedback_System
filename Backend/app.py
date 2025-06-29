@@ -194,8 +194,14 @@ def update_feedback(fid):  # Handler function receives the feedback primary key
             msg['Subject'] = "Your feedback has been updated"  # Informative subject line
             body = (
                 f"Hi {emp['name']},\n\n"
-                "Your manager has updated the feedback previously given to you. "
-                "Please log in to view the latest feedback."
+                "Your manager has just updated the feedback previously provided to you. "
+                "We encourage you to log in to the Feedback Management System to review "
+                "the latest comments and action items.\n\n"
+                "Keeping up with regular feedback helps you grow and align with team goals. "
+                "If you have any questions or need further clarification, please don’t hesitate "
+                "to reach out to your manager or HR.\n\n"
+                "Best regards,\n"
+                "The Feedback Management Team"
             )  # Construct the email body message
             msg.attach(MIMEText(body, "plain"))  # Attach plain-text payload
 
@@ -303,9 +309,13 @@ def register():                                            # Function to render 
             msg['To']      = email                        # Set recipient to new user’s email
             msg['Subject'] = "Welcome to the Feedback System!"  # Friendly subject line
             body = (
-                f"Hello {name},\n\n"                     # Personalized greeting
-                f"Thank you for registering as a {role.capitalize()}! "
-                "We're excited to have you on board."
+                f"Hello {name},\n\n"
+                f"Thank you for registering as a {role.capitalize()} on the DPDZero Feedback Management System.\n\n"
+                "We're excited to have you on board! This platform is designed to help you give and receive constructive feedback, collaborate effectively, and foster a culture of continuous improvement.\n\n"
+                "If you have any questions or need assistance, feel free to reach out to the support team.\n\n"
+                "Best regards,\n"
+                "DPDZero Team"
+
             )                                            # Email body text
             msg.attach(MIMEText(body, "plain"))          # Attach plain-text payload
 
@@ -453,7 +463,7 @@ def otp_verification():  # View function for verifying one-time passwords
         else:  # OTP did not match
             flash(
                 "Invalid or expired OTP. Please try again. "
-                "If you’re not yet registered, you can create an account first.",
+                "If you're not yet registered, you can create an account first.",
                 "warning"
             )  # Inform user of the failure and next steps
             return redirect(url_for('register'))  # Show registration form if they need an account
@@ -689,8 +699,13 @@ def submit_feedback():  # Handler function for feedback creation
             msg['Subject'] = "You've received new feedback!"  # Email subject line
             body = (
                 f"Hi {emp['name']},\n\n"
-                "Your manager has submitted feedback.\n"
-                "Please log in to view it."
+                "Your manager has completed a feedback review of your recent performance. "
+                "We value your contributions and encourage you to reflect on the comments provided. "
+                "Please log in to your DPDZero Feedback Management System to view the detailed feedback, "
+                "acknowledge receipt, and let us know if you have any questions.\n\n"
+                "Thank you for your continued dedication and hard work.\n\n"
+                "Best regards,\n"
+                "The DPDZero Feedback Team"
             )  # Email body text
             msg.attach(MIMEText(body, "plain"))  # Attach plain-text payload
 
