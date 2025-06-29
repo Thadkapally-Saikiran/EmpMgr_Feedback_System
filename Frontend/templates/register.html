@@ -7,18 +7,19 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">  
 </head>  
 
-{% with messages = get_flashed_messages(with_categories=true) %}  
-  {% if messages %}  
-    {% for category, msg in messages %}  
-      <!-- Display each flash message with Bootstrap-style alert classes -->  
-      <div class="alert alert-{{ category }}">  
-          {{ msg }}  
-          <!-- Button to close the alert by hiding its container -->  
-          <button class="close-btn" onclick="this.parentElement.style.display='none'">&times;</button>  
-      </div>  
-    {% endfor %}  
-  {% endif %}  
-{% endwith %}  
+  <!-- Retrieve flash messages with categories -->
+  {% with messages = get_flashed_messages(with_categories=true) %}  
+    {% if messages %}  
+      {% for category, msg in messages %}  
+        <!-- Display each flash message with Bootstrap-style alert classes -->  
+        <div class="alert alert-{{ category }}">  
+            {{ msg }}  
+            <!-- Button to close the alert by hiding its container -->  
+            <button class="close-btn" onclick="this.parentElement.style.display='none'">&times;</button>  
+        </div>  
+      {% endfor %}  
+    {% endif %}  
+  {% endwith %}  
 
 <body>  
   <h2>Register</h2>  

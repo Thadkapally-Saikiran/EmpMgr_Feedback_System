@@ -264,14 +264,14 @@ th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
   color: #8a1f1c;
 }
 
-/* Dismiss button */
+/* Dismiss alert close button */
 .alert .close-btn {
   position: absolute;
   top: 0.25rem;
   right: 0.5rem;
   background: none;
   border: none;
-  font-size: 1.2rem;
+  font-size: 1.7rem;
   cursor: pointer;
   line-height: 1;
   color: inherit;

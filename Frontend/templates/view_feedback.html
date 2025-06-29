@@ -13,31 +13,18 @@
 </head>
 <body>  <!-- Main content area -->
 
-  <!-- Flash messages go here -->
-  {% with messages = get_flashed_messages(with_categories=true) %} <!-- Check for any flashed messages -->
-    {% if messages %}  <!-- If there are any messages -->
-      <!-- Loop through each message with its category -->
-      {% for category, msg in messages %}
-        <div 
-          class="alert alert-{{ category }} alert-dismissible fade show
-                d-flex align-items-center mt-3"
-          role="alert"
-        >
-          <!-- Message as a flex item that grows -->
-          <div class="flex-grow-1">
-            {{ msg }}
-          </div>
-
-          <!-- Close button pushed to the far right -->
-          <button
-            type="button" 
-            class="btn-close"
-            data-bs-dismiss="alert"
-            aria-label="Close"
-          ></button>
-        </div>
-      {% endfor %}
-    {% endif %}
+  <!-- Retrieve flash messages with categories -->
+  {% with messages = get_flashed_messages(with_categories=true) %}  
+    {% if messages %}  
+      {% for category, msg in messages %}  
+        <!-- Display each flash message with Bootstrap-style alert classes -->  
+        <div class="alert alert-{{ category }}">  
+            {{ msg }}  
+            <!-- Button to close the alert by hiding its container -->  
+            <button class="close-btn" onclick="this.parentElement.style.display='none'">&times;</button>  
+        </div>  
+      {% endfor %}  
+    {% endif %}  
   {% endwith %}
 
   <a href="{{ url_for('dashboard') }}">← Back to Dashboard</a>  <!-- Navigation link back to user dashboard -->
