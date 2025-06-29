@@ -12,10 +12,11 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">  <!-- Link to external CSS via Flask helper -->
 </head>
 <body>  <!-- Main content area -->
-  
+
   <!-- Flash messages go here -->
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
+  {% with messages = get_flashed_messages(with_categories=true) %} <!-- Check for any flashed messages -->
+    {% if messages %}  <!-- If there are any messages -->
+      <!-- Loop through each message with its category -->
       {% for category, msg in messages %}
         <div 
           class="alert alert-{{ category }} alert-dismissible fade show
@@ -29,7 +30,7 @@
 
           <!-- Close button pushed to the far right -->
           <button
-            type="button"
+            type="button" 
             class="btn-close"
             data-bs-dismiss="alert"
             aria-label="Close"
