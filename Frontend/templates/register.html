@@ -6,6 +6,7 @@
   <!-- Link to custom CSS for consistent styling -->  
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">  
 </head>  
+
 {% with messages = get_flashed_messages(with_categories=true) %}  
   {% if messages %}  
     {% for category, msg in messages %}  
@@ -18,6 +19,7 @@
     {% endfor %}  
   {% endif %}  
 {% endwith %}  
+
 <body>  
   <h2>Register</h2>  
   <!-- Registration form submits via POST to same endpoint -->  
