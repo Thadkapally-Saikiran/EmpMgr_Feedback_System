@@ -286,7 +286,7 @@ def register():                                            # Function to render 
                 flash("That email is already registered. Please log in or use another email.", "warning")  # Duplicate email warning
                 cursor.close()                            # Close cursor before returning
                 db.close()                                # Close DB connection
-                return render_template('register.html')   # Re-display form for a different email
+                return redirect(url_for('register'))     # Redirect back to registration form
             # any other integrity error, re-raise
             cursor.close()                                # Clean up cursor
             db.close()                                    # Clean up connection
