@@ -49,7 +49,7 @@
       {% for c in comments_map.get(fb.id, []) %}  <!-- Loop through comments for this feedback -->
         <div class="comment">  <!-- Individual comment block -->
           <strong>{{ c.user }}</strong><br/>  <!-- Show commenter’s name in bold -->
-          {{ c.text }}  <!-- Display comment text, may include markdown-rendered HTML -->
+          <span class="comment-body">{{ c.text }}</span>  <!-- Display comment text, may include markdown-rendered HTML -->
         </div>
       {% endfor %}
     </div>

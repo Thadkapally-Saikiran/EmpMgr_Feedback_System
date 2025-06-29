@@ -885,75 +885,99 @@ def acknowledge_feedback(fid):  # Handler takes feedback primary key
 # -------------------------------
 # Route: Add a comment to a feedback (markdown supported)
 # -------------------------------
-@app.route('/add_comment/<int:fid>', methods=['POST'])  # Map POST requests with feedback ID to this view
-def add_comment(fid):  # Handler function receives feedback primary key
+@app.route('/add_comment/<int:fid>', methods=['POST']) # Define route to add a comment to feedback by ID
+def add_comment(fid): # Handler function to add a comment to a specific feedback entry
     # Only logged-in users can comment
-    if 'user_id' not in session:  # Check for authentication token
-        return redirect(url_for('login'))  # Redirect unauthenticated users to login page
+    if 'user_id' not in session:   # Check if user is authenticated
+        return redirect(url_for('login')) # Redirect unauthenticated users to login page
 
-    commenter_id   = session['user_id']  # Grab current user’s ID from session store
-    commenter_role = session['role']     # Determine whether user is 'manager' or 'employee'
-    commenter_name = session['name']     # Get user's display name for personalized messages
-    comment_text   = request.form['comment']  # Read submitted comment text from HTML form input
+    commenter_id   = session['user_id'] # Get the ID of the user who is commenting
+    commenter_role = session['role']  # Get the role of the user (manager or employee)
+    commenter_name = session['name']  # Get the name of the user who is commenting
+    # Trim and validate the submitted text
+    comment_text = request.form.get('comment', '').strip() # Retrieve comment text from form and trim whitespace
+    if not comment_text: # If comment is empty after trimming
+        flash("Comment cannot be empty.", "warning") # Show warning message to user
+        # Redirect back exactly as below according to role
+        if commenter_role == 'manager':  # If the commenter is a manager
+            db     = connect_db() # Open a new database connection
+            cursor = db.cursor(dictionary=True) # Create a cursor that returns dict rows
+            cursor.execute(
+                "SELECT employee_id AS other_id FROM feedback WHERE id=%s",
+                (fid,)
+            ) # Query to get the employee ID associated with this feedback
+            other_id = cursor.fetchone()['other_id'] # Fetch the employee ID from the result
+            cursor.close(); db.close() # Close the cursor and database connection
+            # Redirect to the manager's view of the feedback
+            return redirect(url_for('manager_view_feedback', emp_id=other_id)) 
+        else:   # If the commenter is an employee
+            next_url = request.form.get('next') or url_for('dashboard') # Get the next URL from the form or default to dashboard
+            return redirect(next_url) # Redirect to the next URL or dashboard
 
     # 1) Insert into comments table
-    db     = connect_db()  # Establish new DB connection
-    cursor = db.cursor()   # Use default cursor (tuple-based)
+    db     = connect_db() # Open a new database connection
+    cursor = db.cursor() # Create a cursor for executing SQL commands
     cursor.execute(
         "INSERT INTO comments (feedback_id, user_id, comment_text) VALUES (%s, %s, %s)",
-        (fid, commenter_id, comment_text)  # Parameterized query for SQL injection prevention
-    )
-    db.commit()  # Persist new comment row to database
+        (fid, commenter_id, comment_text)
+    ) # Insert the new comment into the comments table
+    db.commit() # Commit the transaction to save changes
 
     # 2) Determine the recipient
-    if commenter_role == 'manager':  # If manager left the comment…
-        cursor = db.cursor(dictionary=True)  # Switch to dict cursor for named columns
-        cursor.execute("SELECT employee_id AS other_id FROM feedback WHERE id=%s", (fid,))  # Lookup employee
-    else:  # If employee left the comment…
-        cursor = db.cursor(dictionary=True)  # Dict cursor allows ['other_id'] access
-        cursor.execute("SELECT manager_id  AS other_id FROM feedback WHERE id=%s", (fid,))  # Lookup manager
-    other_id = cursor.fetchone()['other_id']  # Extract the “other” user’s ID
+    if commenter_role == 'manager': # If the commenter is a manager
+        cursor = db.cursor(dictionary=True) # Create a cursor that returns dict rows
+        cursor.execute(
+            "SELECT employee_id AS other_id FROM feedback WHERE id=%s",
+            (fid,)
+        ) # Query to get the employee ID associated with this feedback
+    else: # If the commenter is an employee
+        cursor = db.cursor(dictionary=True) # Create a cursor that returns dict rows
+        cursor.execute(
+            "SELECT manager_id AS other_id FROM feedback WHERE id=%s",
+            (fid,)
+        )  # Query to get the manager ID associated with this feedback
+    other_id = cursor.fetchone()['other_id'] # Fetch the other user ID (employee or manager) from the result
 
     # 3) Lookup their email & name
-    cursor.execute("SELECT email, name FROM users WHERE id=%s", (other_id,))  # Fetch notification target
-    other = cursor.fetchone()  # Tuple or dict depending on cursor type
-    cursor.close()  # Release cursor resources
-    db.close()      # Close DB connection
+    cursor.execute(
+        "SELECT email, name FROM users WHERE id=%s",
+        (other_id,)
+    )  # Query to get the email and name of the other user
+    other = cursor.fetchone() # Fetch the result as a dict
+    cursor.close() # Close the cursor to free resources
+    db.close() # Close the database connection
 
     # 4) Send notification email
-    if other and other['email']:  # Ensure valid recipient address exists
-        try:
-            msg = MIMEMultipart()  # Build a multipart email
-            msg['From']    = SENDER_EMAIL  # Sender address from ENV
-            msg['To']      = other['email']  # Recipient email
-            who = 'Manager' if commenter_role == 'manager' else 'Employee'  # Label sender role
-            msg['Subject'] = f"New comment from {who} on Feedback #{fid}"  # Set informative subject
+    if other and other['email']: # Check if the other user exists and has an email address
+        try: # If the other user exists and has an email address
+            msg = MIMEMultipart()  # Create a new email message
+            msg['From']    = SENDER_EMAIL  # Set the sender's email address from environment variable
+            msg['To']      = other['email'] # Set the recipient's email address from the fetched user
+            who = 'Manager' if commenter_role == 'manager' else 'Employee' # Determine who is commenting based on their role
+            msg['Subject'] = f"New comment from {who} on Feedback #{fid}" # Set the email subject with the feedback ID and commenter role
             body = (
                 f"Hi {other['name']},\n\n"
                 f"{who} {commenter_name} just commented on feedback #{fid}:\n\n"
                 f"\"{comment_text}\"\n\n"
                 f"View it here: {request.url_root}view_feedback\n\n"
                 "— Your Feedback System"
-            )  # Compose email body with link to system
-            msg.attach(MIMEText(body, "plain"))  # Attach plain-text payload
+            ) # Construct the email body with comment details
+            msg.attach(MIMEText(body, "plain")) # Attach the email body
 
-            with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:  # Connect to SMTP relay
-                server.starttls()  # Enable TLS encryption
-                server.login(SENDER_EMAIL, SENDER_PASS)  # Authenticate with SMTP creds
-                server.send_message(msg)  # Dispatch the message
-        except Exception as e:
-            app.logger.error(f"Failed to send comment notification: {e}")  # Log failure but don’t crash
+            with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server: # Connect to the SMTP server
+                server.starttls() # Upgrade connection to secure TLS
+                server.login(SENDER_EMAIL, SENDER_PASS) # Authenticate with SMTP server
+                server.send_message(msg) # Send the email notification
+        except Exception as e: # Catch any errors during email sending
+            app.logger.error(f"Failed to send comment notification: {e}") # Log the error
 
     # 5) Flash & redirect to the correct view
-    flash("Comment added and notification sent!", "success")  # User feedback via flash-messaging
-    if commenter_role == 'manager':  # Redirect managers back to their view_feedback page
-        return redirect(url_for('manager_view_feedback', emp_id=other_id))
-    else:  # Redirect employees to dashboard or next URL
-        next_url = request.form.get('next') or url_for('dashboard')
-        return redirect(next_url)
-
-
-
+    flash("Comment added and notification sent!", "success") # Show success message
+    if commenter_role == 'manager': # If the commenter is a manager
+        return redirect(url_for('manager_view_feedback', emp_id=other_id)) # Redirect to manager view
+    else: # If the commenter is an employee
+        next_url = request.form.get('next') or url_for('dashboard') # Get the next URL or default to dashboard
+        return redirect(next_url) # Redirect to the next URL or dashboard if not found
 
 
 
